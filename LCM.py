@@ -10,8 +10,9 @@ Output: 840
 import sys
 
 
-numbers = list(range(1, int(sys.argv[1]) + 1))
-print("Least common multiple from 1 through " + sys.argv[1] + ":")
+num_threads = int(sys.argv[1])
+numbers = list(range(1, int(num_threads) + 1))
+
 
 multiple = 1
 

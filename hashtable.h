@@ -11,7 +11,7 @@
 /* type definition for a generic comparing function */
 typedef int (*hash_table_compare_function)(const void *, const void *);
 /* type definition for a for-each function */
-typedef int (*hash_table_hash_function)(const void *);
+typedef unsigned long (*hash_table_hash_function)(const void *);
 
 
 typedef struct list_node {
@@ -21,7 +21,7 @@ typedef struct list_node {
 
 
 typedef struct hash_table {
-	int max_size;
+	int size;
 	int count;
 	list_node_t * * elements;
 	pthread_rwlock_t * locks;
