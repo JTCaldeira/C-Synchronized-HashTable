@@ -105,10 +105,22 @@ do_work(void * data)
 	for (i = 0; i < num_str_per_thread; i++)
 		hash_table_insert(table, str_array[i]);
 
+	// ************************************
+	struct timespec start, end;
+	clock_gettime(CLOCK_REALTIME, &start);
+
 	for (i = 0; i < num_lookups_per_thread; i++)
 		hash_table_contains(table, str_array[rand() % num_str_per_thread]);
 
-	for (i = 0; i < num_str_per_thread / 2; i++) {
+	clock_gettime(CLOCK_REALTIME, &end);
+
+	double a1 = start.tv_sec + start.tv_nsec*1e-9;
+	double a2 = end.tv_sec + end.tv_nsec*1e-9;
+
+	printf("Lookup time: %.4lf\n", a2 - a1);
+
+	/*
+	for (i = 0; i < num_str_per_thread; i++) {
 		int str_index = rand() % num_str_per_thread;
 
 		if (str_array[str_index]) {
@@ -117,6 +129,7 @@ do_work(void * data)
 			str_array[str_index] = NULL;
 		}
 	}
+	*/
 
 	for (i = 0; i < num_str_per_thread; i++)
 		if (str_array[i])
