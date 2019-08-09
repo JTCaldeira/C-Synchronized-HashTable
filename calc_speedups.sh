@@ -13,7 +13,7 @@ if ! gcc -Werror -Wall -Wextra -ggdb3 -std=c99 -D_GNU_SOURCE -pthread -o test bi
 fi
 
 num_lines="$(("${lcm}"*100))"
-num_lookups="$(("${num_lines}"*10))"
+num_lookups="$(("${num_lines}"*1000))"
 
 for i in $(seq 1 $num_cores)
 do

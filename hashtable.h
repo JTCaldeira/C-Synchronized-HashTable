@@ -24,8 +24,8 @@ typedef struct hash_table {
 	int size;
 	int count;
 	list_node_t * * elements;
-	pthread_rwlock_t * locks;
-	pthread_rwlock_t global_table_lock;
+	pthread_mutex_t * locks;
+	pthread_mutex_t global_table_lock;
 	hash_table_compare_function compare;	/* should return 0 if equal */
 	hash_table_hash_function hash;
 } hash_table_t;

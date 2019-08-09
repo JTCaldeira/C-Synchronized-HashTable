@@ -8,9 +8,8 @@
 /* see if PTHREAD_RWLOCK_INITIALIZER works, that way no need for ..._destroy() */
 
 
-#define LOCK_RD(lock)	pthread_rwlock_rdlock(&lock);
-#define LOCK_WR(lock)	pthread_rwlock_wrlock(&lock);
-#define UNLOCK(lock)	pthread_rwlock_unlock(&lock);
+#define LOCK(lock)		pthread_mutex_lock(&lock);
+#define UNLOCK(lock)	pthread_mutex_unlock(&lock);
 #define	GET_INDEX(hash_value, size)	{ hash_value % size }
 
 
@@ -37,7 +36,7 @@ hash_table_create(hash_table_compare_function cmp_fn, hash_table_hash_function h
 		return NULL;
 	}
 
-	table->locks = malloc(table->size * sizeof(pthread_rwlock_t));
+	table->locks = malloc(table->size * sizeof(pthread_mutex_t));
 	if (!table->locks) {
 		perror("Error");
 		free(table->elements);
@@ -47,7 +46,7 @@ hash_table_create(hash_table_compare_function cmp_fn, hash_table_hash_function h
 
 	for (int i = 0; i < table->size; i++) {
 		table->elements[i] = NULL;
-		pthread_rwlock_init(&table->locks[i], NULL);
+		pthread_mutex_init(&table->locks[i], NULL);
 	}
 
 	if (!cmp_fn || !hash_fn) {
@@ -60,7 +59,7 @@ hash_table_create(hash_table_compare_function cmp_fn, hash_table_hash_function h
 
 	table->compare = cmp_fn;
 	table->hash = hash_fn;
-	pthread_rwlock_init(&table->global_table_lock, NULL);
+	pthread_mutex_init(&table->global_table_lock, NULL);
 
 	return table;
 }
@@ -95,7 +94,7 @@ hash_table_insert(hash_table_t * table, void * element)
 	}
 
 	if (!table->elements[index]) {
-		LOCK_WR(table->global_table_lock);
+		LOCK(table->global_table_lock);
 
 		if (!table->elements[index]) {
 			table->elements[index] = new_node;
@@ -103,7 +102,7 @@ hash_table_insert(hash_table_t * table, void * element)
 
 		UNLOCK(table->global_table_lock);
 	} else {
-		LOCK_WR(table->locks[index]);
+		LOCK(table->locks[index]);
 		new_node->next = table->elements[index];
 		table->elements[index] = new_node;
 		UNLOCK(table->locks[index]);
@@ -125,7 +124,7 @@ hash_table_contains(hash_table_t * table, void * element)
 	int index = GET_INDEX(table->hash(element), table->size);
 	list_node_t * node;
 
-	LOCK_RD(table->locks[index]);
+	LOCK(table->locks[index]);
 
 	node = table->elements[index];
 
@@ -150,7 +149,7 @@ hash_table_remove(hash_table_t * table, void * element)
 	int index = GET_INDEX(table->hash(element), table->size);
 	list_node_t * node, * prev;
 
-	LOCK_WR(table->locks[index]);
+	LOCK(table->locks[index]);
 
 	node = table->elements[index];
 	prev = NULL;
@@ -195,7 +194,7 @@ void
 hash_table_destroy(hash_table_t * table)
 {
 	for (int i = 0; i < table->size; i++) {
-		pthread_rwlock_destroy(&table->locks[i]);
+		pthread_mutex_destroy(&table->locks[i]);
 
 		list_node_t * node = table->elements[i], * aux = NULL;
 
