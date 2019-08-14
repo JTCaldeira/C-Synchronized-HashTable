@@ -32,11 +32,11 @@ person_compare_function(const void * p, const void * id)
 }
 
 
-int
+unsigned long
 person_hash_function(const void * p)
 {
 	unsigned long hash = 5381;
-	int c;
+	unsigned long c;
 	char * str = (char*)(((person_t*)p)->name);
 
 	while ((c = *str++))
