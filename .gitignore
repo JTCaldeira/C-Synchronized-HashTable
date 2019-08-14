@@ -11,4 +11,3 @@ big_string_test.c
 calc_speedups.sh
 LCM.py
 lines_generator.py
-struct_test.c
