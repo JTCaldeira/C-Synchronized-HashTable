@@ -16,7 +16,7 @@
 hash_table_t *
 hash_table_create(hash_table_compare_function cmp_fn, hash_table_hash_function hash_fn, int size)
 {
-	hash_table_t * table = malloc(sizeof(hash_table_t));
+	hash_table_t * table = calloc(1, sizeof(hash_table_t));
 
 	if (!table) {
 		perror("Error");
@@ -28,7 +28,6 @@ hash_table_create(hash_table_compare_function cmp_fn, hash_table_hash_function h
 	else
 		table->size = size;
 
-	table->count = 0;
 	table->elements = calloc(table->size, sizeof(list_node_t*));
 	if (!table->elements) {
 		perror("Error");
@@ -36,7 +35,7 @@ hash_table_create(hash_table_compare_function cmp_fn, hash_table_hash_function h
 		return NULL;
 	}
 
-	table->locks = malloc(table->size * sizeof(pthread_mutex_t));
+	table->locks = calloc(table->size, sizeof(pthread_mutex_t));
 	if (!table->locks) {
 		perror("Error");
 		free(table->elements);
@@ -59,7 +58,6 @@ hash_table_create(hash_table_compare_function cmp_fn, hash_table_hash_function h
 
 	table->compare = cmp_fn;
 	table->hash = hash_fn;
-	pthread_mutex_init(&table->global_table_lock, NULL);
 
 	return table;
 }
@@ -68,7 +66,7 @@ hash_table_create(hash_table_compare_function cmp_fn, hash_table_hash_function h
 static list_node_t *
 list_node_create(void * data)
 {
-	list_node_t * node = malloc(sizeof(list_node_t));
+	list_node_t * node = calloc(1, sizeof(list_node_t));
 
 	if (!node) {
 		perror("Error");
@@ -107,12 +105,6 @@ hash_table_insert(hash_table_t * table, void * element)
 		table->elements[index] = new_node;
 		UNLOCK(table->locks[index]);
 	}
-
-	/*
-	LOCK_WR(table->global_table_lock);
-	table->count++;
-	UNLOCK(table->global_table_lock);
-	*/
 
 	return true;
 }
@@ -161,22 +153,12 @@ hash_table_remove(hash_table_t * table, void * element)
 				table->elements[index] = node->next;
 				free(node);
 				UNLOCK(table->locks[index]);
-				/*
-				LOCK_WR(table->global_table_lock);
-				table->count--;
-				UNLOCK(table->global_table_lock);
-				*/
 				return true;
 			} else {
 				// link previous node with one after current
 				prev->next = node->next;
 				free(node);
 				UNLOCK(table->locks[index]);
-				/*
-				LOCK_WR(table->global_table_lock);
-				table->count--;
-				UNLOCK(table->global_table_lock);
-				*/
 				return true;
 			}
 		}
@@ -209,11 +191,3 @@ hash_table_destroy(hash_table_t * table)
 	free(table->elements);
 	free(table);
 }
-
-
-int
-hash_table_getCount(hash_table_t * table)
-{
-	return table->count;
-}
-

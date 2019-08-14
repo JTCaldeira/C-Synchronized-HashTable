@@ -22,7 +22,6 @@ typedef struct list_node {
 
 typedef struct hash_table {
 	int size;
-	int count;
 	list_node_t * * elements;
 	pthread_mutex_t * locks;
 	pthread_mutex_t global_table_lock;
@@ -49,10 +48,6 @@ hash_table_remove(hash_table_t * table, void * element);
 
 void
 hash_table_destroy(hash_table_t * table);
-
-
-int
-hash_table_getCount(hash_table_t * table);
 
 
 #endif /* HASHTABLE_H */
