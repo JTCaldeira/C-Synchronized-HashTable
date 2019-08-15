@@ -1,3 +1,12 @@
+/* =============================================================================
+ *
+ * hashtable.c
+ *
+ * Thread safe hash table with collision resolution by external chaining.
+ *
+ * =============================================================================
+ */
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -5,14 +14,24 @@
 #include "hashtable.h"
 
 
-/* see if PTHREAD_RWLOCK_INITIALIZER works, that way no need for ..._destroy() */
-
-
 #define LOCK(lock)		pthread_mutex_lock(&lock);
 #define UNLOCK(lock)	pthread_mutex_unlock(&lock);
 #define	GET_INDEX(hash_value, size)	{ hash_value % size }
 
 
+/* =============================================================================
+ * hash_table_create
+ *
+ * Creates an empty hash table with the given size.
+ *
+ * @param hash_table_compare_function: the function that is used to find
+ *				element within a bucket.
+ * @param hash_table_hash_function: the function that is used to disperse
+ *				data into the buckets.
+ * @param max_size: the size of the hash table.
+ * @return: a pointer to the created hash table.
+ * =============================================================================
+ */
 hash_table_t *
 hash_table_create(hash_table_compare_function cmp_fn, hash_table_hash_function hash_fn, int size)
 {
@@ -80,6 +99,16 @@ list_node_create(void * data)
 }
 
 
+/* =============================================================================
+ * hash_table_insert
+ *
+ * Inserts a given object into the hash table.
+ *
+ * @param table: the table in which to insert the object
+ * @param element: the data to be inserted in the table
+ * @return: true if the operation succeeded, false otherwise
+ * =============================================================================
+ */
 bool
 hash_table_insert(hash_table_t * table, void * element)
 {
@@ -110,6 +139,16 @@ hash_table_insert(hash_table_t * table, void * element)
 }
 
 
+/* =============================================================================
+ * hash_table_contains
+ *
+ * Check whether the hash table contains a given object.
+ *
+ * @param table: the hash table in which we want to search the object
+ * @param element: the data to search for
+ * @return: true if the object is in the hash table, false otherwise
+ * =============================================================================
+ */
 bool
 hash_table_contains(hash_table_t * table, void * element)
 {
@@ -135,6 +174,16 @@ hash_table_contains(hash_table_t * table, void * element)
 }
 
 
+/* =============================================================================
+ * hash_table_remove
+ *
+ * Removes a given object from the hash table.
+ *
+ * @param table: the hash table we want to remove the object from
+ * @param element: the data to be removed
+ * @return: true if the operation succeeded, false otherwise
+ * =============================================================================
+ */
 bool
 hash_table_remove(hash_table_t * table, void * element)
 {
@@ -172,6 +221,14 @@ hash_table_remove(hash_table_t * table, void * element)
 }
 
 
+/* =============================================================================
+ * hash_table_destroy
+ *
+ * Free all the memory allocated in the creation of the hash table.
+ *
+ * @param table: the table we want to destroy
+ * =============================================================================
+ */
 void
 hash_table_destroy(hash_table_t * table)
 {
